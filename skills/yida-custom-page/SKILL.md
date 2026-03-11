@@ -246,10 +246,10 @@ this.forceUpdate();
    ```
 
 2. **输入法处理**：使用 `_isComposing` 标记配合 `compositionstart` / `compositionend` 事件，正确处理中文输入法的组合输入状态，避免输入过程中触发提交
-2. **定时器清理**：在 `didUnmount` 中必须清理所有通过 `setInterval` / `setTimeout` 创建的定时器，防止内存泄漏
-3. **错误处理**：所有 API 调用（`this.utils.yida.*`、`fetch`）必须使用 `.catch()` 处理异常，并通过 `this.utils.toast({ title: message, type: 'error' })` 向用户展示错误提示
-4. **样式方式**：所有样式通过 JavaScript 对象定义（内联样式），在 `renderJsx` 中通过 `style` 属性应用，不使用外部 CSS 文件
-5. **异步操作**：可以使用 `async/await` 语法，Babel 编译会自动转换为 ES5 兼容代码
+3. **定时器清理**：在 `didUnmount` 中必须清理所有通过 `setInterval` / `setTimeout` 创建的定时器，防止内存泄漏
+4. **错误处理**：所有 API 调用（`this.utils.yida.*`、`fetch`）必须使用 `.catch()` 处理异常，并通过 `this.utils.toast({ title: message, type: 'error' })` 向用户展示错误提示
+5. **样式方式**：所有样式通过 JavaScript 对象定义（内联样式），在 `renderJsx` 中通过 `style` 属性应用，不使用外部 CSS 文件
+6. **异步操作**：可以使用 `async/await` 语法，Babel 编译会自动转换为 ES5 兼容代码
 6. **输入框必须使用非受控组件**：在宜搭环境中，`<input>` 的 `value` 属性绑定状态后，每次 `onChange` 触发 `setCustomState` → `forceUpdate` → 整个 JSX 重渲染，会导致输入框失焦或输入被吞掉，用户无法正常输入文字。**正确做法**：使用 `defaultValue` 代替 `value`，在 `onChange` 中仅更新 `_customState` 而不调用 `setCustomState`（避免触发重渲染），需要清空输入框时通过 `document.getElementById` 直接操作 DOM。示例：
 
 ```javascript
