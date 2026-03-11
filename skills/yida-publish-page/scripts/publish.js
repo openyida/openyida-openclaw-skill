@@ -90,7 +90,17 @@ function compileSource(sourcePath) {
   console.log(`[2/4] Babel 编译 ${sourceFileName}...`);
   const babelResult = babelTransform(sourceCode, {}, false, { RE_VERSION: "7.4.0" });
   if (babelResult.error instanceof Error) {
-    console.error(`  编译失败：${babelResult.error.message}`);
+    const err = babelResult.error;
+    let errorMsg = `  ❌ 编译失败：${err.message}`;
+    
+    if (err.loc) {
+      errorMsg += `\n     位置: 第 ${err.loc.line} 行, 第 ${err.loc.column} 列`;
+    }
+    if (err.code) {
+      errorMsg += `\n     错误码: ${err.code}`;
+    }
+    
+    console.error(errorMsg);
     process.exit(1);
   }
 
