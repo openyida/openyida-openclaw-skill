@@ -99,8 +99,6 @@ yida-skills/
 │   └── contact-form/
 ├── .github/
 │   └── workflows/                 # CI 配置
-├── install.sh                     # 一键安装脚本
-├── getting-started.md             # 快速上手指南
 ├── README.md
 └── LICENSE
 ```
