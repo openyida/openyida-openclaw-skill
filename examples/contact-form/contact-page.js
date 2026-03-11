@@ -13,21 +13,28 @@ export function getCustomState(key) {
   return { ..._customState };
 }
 
+// 注意：所有 export function 中的 this 均由宜搭平台绑定为页面 React 类实例，
+// 通过 self.setCustomState() / self.forceUpdate() 等方式调用时 this 指向正确。
+
 export function setCustomState(newState) {
   Object.keys(newState).forEach(function(key) {
     _customState[key] = newState[key];
   });
+  // this 由宜搭平台绑定，调用导出的 forceUpdate 函数触发重新渲染
   this.forceUpdate();
 }
 
 export function forceUpdate() {
+  // 通过更新 timestamp 触发 React 重渲染
   this.setState({ timestamp: new Date().getTime() });
 }
 
 export function didMount() {
+  // 页面加载完成后的初始化逻辑（如有需要可在此处加载数据）
 }
 
 export function didUnmount() {
+  // 页面卸载时的清理逻辑（如有定时器需在此处清除）
 }
 
 export function renderJsx() {
