@@ -2,7 +2,20 @@
 
 > 宜搭（Yida）AI 技能合集 —— 让 AI 助手具备完整的宜搭平台开发能力
 
-一套专为 [钉钉宜搭](https://www.aliwork.com) 平台设计的 AI Skills，覆盖从登录、建应用、建表单、开发自定义页面到发布的完整研发链路。配合 **OpenCode** 或 **ClaudeCode** 使用（支持龙虾🦞），让 AI 真正能帮你端到端地完成宜搭应用开发。
+[![MIT License](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
+[![GitHub Stars](https://img.shields.io/github/stars/openyida/yida-skills)](https://github.com/openyida/yida-skills/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/openyida/yida-skills)](https://github.com/openyida/yida-skills/fork)
+
+一套专为 [钉钉宜搭](https://www.aliwork.com) 平台设计的 AI Skills，覆盖从登录、建应用、建表单、开发自定义页面到发布的完整研发链路。配合 **OpenCode** 或 **ClaudeCode** 使用，让 AI 真正能帮你端到端地完成宜搭应用开发。
+
+## 功能特性
+
+- 🔐 **登录态管理** - Cookie 持久化 + 扫码登录，自动续期
+- 📱 **应用创建** - 一句话创建宜搭应用
+- 📝 **表单开发** - 支持 19 种字段类型，CRUD 操作
+- ⚛️ **自定义页面** - React 16 JSX 开发，27 个 API
+- 🚀 **一键发布** - Babel 编译 + Schema 部署
+- 🔄 **完整工作流** - 从需求到发布，端到端自动化
 
 ---
 
@@ -62,15 +75,30 @@ yida-skills/
 ├── skills/                        # 技能源文件
 │   ├── yida-login/                # 登录管理
 │   │   ├── SKILL.md               # 技能说明（AI 读取）
-│   │   └── scripts/login.py       # 执行脚本
+│   │   └── scripts/               # 执行脚本
+│   │       └── login.py
 │   ├── yida-logout/
 │   ├── yida-create-app/
+│   │   └── scripts/
+│   │       └── create-app.js
 │   ├── yida-create-page/
 │   ├── yida-create-form-page/
+│   │   └── reference/             # 参考文档
 │   ├── yida-custom-page/
+│   │   └── reference/            # 参考文档
+│   │       ├── yida-api.md
+│   │       └── model-api.md
 │   ├── yida-publish-page/
+│   │   └── scripts/
+│   │       ├── publish.js
+│   │       ├── babel-transform/
+│   │       └── package.json
 │   ├── yida-app/
 │   └── yida-get-schema/
+├── examples/                      # 示例代码
+│   └── contact-form/
+├── .github/
+│   └── workflows/                 # CI 配置
 ├── install.sh                     # 一键安装脚本
 ├── getting-started.md             # 快速上手指南
 ├── README.md
@@ -124,6 +152,27 @@ AI 生成灯谜图片，用户猜答案，猜错了有 AI 幽默提示。
 node --check skills/*/scripts/*.js
 ```
 
+### 贡献者
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/yize"><img src="https://avatars.githubusercontent.com/u/1578814?v=4?s=100" width="100px;" alt="九神"/><br /><sub><b>九神</b></sub></a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/alexmm"><img src="https://avatars.githubusercontent.com/u/324539017?v=4?s=100" width="100px;" alt="天晟"/><br /><sub><b>天晟</b></sub></a></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+感谢所有贡献者！
+
 ---
 
 ## 示例代码
@@ -146,4 +195,12 @@ node --check skills/*/scripts/*.js
 
 ## License
 
-[MIT](./LICENSE) © 2026 天晟
+[MIT](./LICENSE) © 2026 [天晟](https://github.com/alexmm)
+
+---
+
+## 致谢
+
+- [Anthropic](https://www.anthropic.com/) - Claude & Skills 规范
+- [钉钉宜搭](https://www.aliwork.com/) - 低代码平台
+- [OpenCode](https://opencode.com/) - AI Coding 工具
