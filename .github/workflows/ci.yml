@@ -31,3 +31,18 @@ jobs:
           node -e "JSON.parse(require('fs').readFileSync(process.argv[1]))" -- "$file" || exit 1
           echo "  ✅ $file"
         done
+
+    - name: Install test dependencies
+      run: npm install
+
+    - name: Run unit tests
+      run: npm run test:unit
+
+    - name: Run integration tests
+      run: npm run test:integration
+
+    - name: Run regression tests
+      run: npm run test:regression
+
+    - name: Run tests with coverage
+      run: npm run test:coverage
