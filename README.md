@@ -189,5 +189,6 @@ Thanks to all contributors:
 ## 致谢
 
 - [Anthropic](https://www.anthropic.com/) - Claude & Skills 规范
+- [阿里巴巴 Low Code Engine](https://github.com/alibaba/lowcode-engine) - 企业级低代码技术体系（15.8k⭐）
 - [钉钉宜搭](https://www.aliwork.com/) - 低代码平台
 - [OpenCode](https://opencode.com/) - AI Coding 工具
