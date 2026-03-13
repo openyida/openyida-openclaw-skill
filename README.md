@@ -40,13 +40,15 @@
 ### 使用 openyida 默认工程模板（推荐）
 
 ```bash
-# 1.克隆仓库
+# 1. 克隆仓库（含 Skills 子模块）
+git clone --recurse-submodules https://github.com/openyida/openyida.git
 
-  git clone https://github.com/openyida/openyida.git
+# 2. 使用代码编辑器打开项目，打开自己的 AI 编程工具
+# 3. 一句话生成应用：帮我搭建一个生日祝福小游戏应用
+# 4. 根据需求文档生成应用：帮我搭建个人薪资计算器应用
 
-# 2. 使用代码编辑器打开项目，打开 AI Coding 工具，输入：执行安装脚本
-# 3. Skills 安装完成后，AI Coding 工具，输入：帮我搭建一个生日祝福小游戏应用
-
+# 已克隆但未带子模块？执行以下命令补充初始化：
+# git submodule update --init --recursive
 ```
 
 ### 使用自己的项目工程，请参考文件结构约定
@@ -182,7 +184,7 @@ Thanks to all contributors:
 
 ## License
 
-[MIT](./LICENSE) © 2026 [天晟](https://github.com/alex-mm)
+[MIT](./LICENSE) © 2026 [Alibaba Group](https://github.com/alibaba)
 
 ---
 
