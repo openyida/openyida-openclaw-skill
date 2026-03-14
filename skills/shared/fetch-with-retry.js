@@ -110,57 +110,44 @@ function resolveBaseUrl(cookieData) {
 }
 
 /**
- * 触发完整登录流程（扫码）
+ * 登录态失效时退出并提示 agent 调用 yida-login skill。
+ *
+ * 不再自动调用 login.py，因为在 OpenClaw agent 环境下需要通过
+ * yida-login skill 完成扫码登录（browser 工具 + 用户交互）。
  */
 function triggerLogin() {
-  console.error("\n🔐 登录态失效，正在调用 login.py 重新登录...\n");
-  if (!fs.existsSync(LOGIN_SCRIPT)) {
-    console.error(`  ❌ 登录脚本不存在: ${LOGIN_SCRIPT}`);
-    process.exit(1);
-  }
-  const stdout = execSync(`python3 "${LOGIN_SCRIPT}"`, {
-    encoding: "utf-8",
-    stdio: ["inherit", "pipe", "inherit"],
-    timeout: 180_000,
-  });
-  const lines = stdout.trim().split("\n");
-  const jsonLine = lines[lines.length - 1];
-  try {
-    const loginResult = JSON.parse(jsonLine);
-    if (!loginResult.cookies) throw new Error("登录结果缺少 cookies");
-    return loginResult;
-  } catch (err) {
-    console.error(`  ❌ 解析登录结果失败: ${err.message}`);
-    process.exit(1);
-  }
+  console.error("\n========================================");
+  console.error("❌ 登录态失效，无法继续执行。");
+  console.error("");
+  console.error("【Agent 必须执行以下操作】");
+  console.error("1. 立即调用 yida-login skill");
+  console.error("2. yida-login skill 会用 browser 工具打开钉钉扫码页面");
+  console.error("3. 截图并通过 message.send 发给用户扫码");
+  console.error("4. 用户扫码选择组织后保存 Cookie");
+  console.error("5. Cookie 保存成功后重新执行本命令");
+  console.error("");
+  console.error("⚠️  严禁直接告知用户去自己打开浏览器扫码！");
+  console.error("========================================\n");
+  process.exit(1);
 }
 
 /**
- * 刷新 CSRF Token（无头模式，无需扫码）
+ * CSRF Token 失效时退出并提示 agent 调用 yida-login skill。
  */
 function refreshCsrfToken() {
-  console.error("\n🔄 csrf_token 已过期，正在刷新...\n");
-  if (!fs.existsSync(LOGIN_SCRIPT)) {
-    console.error(`  ❌ 登录脚本不存在: ${LOGIN_SCRIPT}`);
-    process.exit(1);
-  }
-  const stdout = execSync(`python3 "${LOGIN_SCRIPT}" --refresh-csrf`, {
-    encoding: "utf-8",
-    stdio: ["inherit", "pipe", "inherit"],
-    timeout: 60_000,
-  });
-  const lines = stdout.trim().split("\n");
-  const jsonLine = lines[lines.length - 1];
-  try {
-    const result = JSON.parse(jsonLine);
-    if (!result.csrf_token || !result.cookies) {
-      throw new Error("刷新结果缺少 csrf_token 或 cookies");
-    }
-    return result;
-  } catch (err) {
-    console.error(`  ❌ 解析刷新结果失败: ${err.message}`);
-    process.exit(1);
-  }
+  console.error("\n========================================");
+  console.error("❌ csrf_token 已过期，无法继续执行。");
+  console.error("");
+  console.error("【Agent 必须执行以下操作】");
+  console.error("1. 立即调用 yida-login skill");
+  console.error("2. yida-login skill 会用 browser 工具打开钉钉扫码页面");
+  console.error("3. 截图并通过 message.send 发给用户扫码");
+  console.error("4. 用户扫码选择组织后保存 Cookie");
+  console.error("5. Cookie 保存成功后重新执行本命令");
+  console.error("");
+  console.error("⚠️  严禁直接告知用户去自己打开浏览器扫码！");
+  console.error("========================================\n");
+  process.exit(1);
 }
 
 // ── 响应错误类型判断 ──────────────────────────────────────────────────

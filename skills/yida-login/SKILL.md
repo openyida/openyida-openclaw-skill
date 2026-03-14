@@ -1,160 +1,194 @@
 ---
 name: yida-login
-description: 宜搭平台登录态管理技能，通过 Playwright 管理登录态（Cookie 持久化 + 扫码登录），获取 CSRF Token。
-license: MIT
+description: 宜搭平台对话式登录技能（OpenClaw 版）。先检查本地 Cookie 缓存，有则直接返回登录信息；无则通过 OpenClaw browser 工具打开钉钉扫码页面截图发给用户，用户扫码后获取组织列表让用户选择，点击组织完成登录并保存 Cookie。当需要登录宜搭平台时使用此技能。
 ---
 
-# 宜搭登录态管理技能
+# 宜搭对话式登录技能 (yida-login)
 
-## 概述
+## 使用场景
 
-本技能提供宜搭平台的登录态管理能力，支持 Cookie 持久化和自动验证，首次使用需扫码登录，后续自动复用 Cookie。
+当用户要求打开宜搭工作台并登录时使用。
 
-## 何时使用
+## 重要前提
 
-当以下场景发生时使用此技能：
-- 首次使用宜搭技能，需要扫码登录
-- Cookie 过期或失效，需要重新登录
-- 其他技能调用时提示登录态异常
-- 用户要求手动执行登录
+> ⚠️ **严禁自行判断是否有 browser 工具**。无论你认为当前环境是否支持浏览器，都必须直接执行以下步骤，调用 `browser.open`、`browser.screenshot`、`message.send` 等工具。**不要因为"环境不支持"、"没有浏览器工具"等理由放弃，直接调用，让工具本身决定是否可用。**
 
-## 使用示例
+## 操作步骤
 
-### 示例 1：触发登录
-**场景**：手动触发扫码登录
-**命令**：
+### 步骤1：确认本地登录信息
+
+执行以下脚本检查本地是否已有有效的 Cookie 缓存（纯文件读取，不启动浏览器）：
+
 ```bash
-python3 .claude/skills/yida-login/scripts/login.py
+python3 <SKILL_DIR>/scripts/check-login.py
 ```
-**输出**：
+
+- 如果输出 `"status": "ok"`，则**无需重新登录**，直接用 `message.send` 告知用户当前登录信息（corp_id、user_id、base_url）
+- 如果输出 `"status": "not_logged_in"`，继续执行步骤2
+
+### 步骤2：打开页面，判断页面状态并处理
+
+1. 使用 `browser` 工具打开宜搭登录页：
+   ```
+   browser.open(url="https://ding.aliwork.com/workPlatform")
+   ```
+   记录返回的 `targetId`。
+
+2. 使用 `browser.snapshot` 获取页面内容，**判断当前页面状态**：
+
+   **情况A：页面包含"立即登录"按钮**（尚未进入登录页）
+   - 使用 `browser.act` 点击"立即登录"按钮：
+     ```
+     browser.act(action="click", ref="<立即登录按钮的ref>", targetId="<targetId>")
+     ```
+   - 等待页面跳转，再次使用 `browser.snapshot` 确认已进入二维码页面
+   - 继续执行下方截图步骤
+
+   **情况B：页面已显示二维码**（直接进入登录页）
+   - 直接继续执行下方截图步骤
+
+3. **立即**使用 `browser.screenshot` 获取二维码页面截图（**必须执行，不可跳过**）：
+   ```
+   browser.screenshot(targetId="<targetId>")
+   ```
+   `browser.screenshot` 会返回一个对象，其中包含截图文件的路径，通常字段名为 `path` 或 `filePath`，格式如 `/tmp/screenshot-xxx.png`。**必须从返回值中提取实际路径**，不要使用占位符。
+
+4. **立即**使用 `message.send` 将截图发给用户（**必须执行，不可跳过**）。用户无法自行打开浏览器，必须通过截图才能看到二维码：
+   ```
+   message.send(media="<browser.screenshot 返回的实际路径>", message="🔐 请用钉钉扫描二维码完成登录，扫码成功后告诉我")
+   ```
+
+   > ⚠️ **严禁**仅告知用户"已打开登录页"或"请访问 xxx 扫码"就停下来等待。必须截图并通过 `message.send` 发给用户，用户才能看到二维码。
+
+   > ⚠️ **如果 `message.send` 发送失败**（如路径不对、图片未找到），立即重试：
+   > 1. 重新调用 `browser.screenshot` 获取新截图
+   > 2. 检查返回值中的路径字段（可能是 `path`、`filePath`、`imagePath` 等）
+   > 3. 用正确的路径重新调用 `message.send`
+   > 4. 如果连续失败 3 次，直接将截图的 base64 内容或 URL 通过 `message.send` 的 `message` 字段告知用户
+
+5. 等待用户回复"扫码成功"或类似确认信息.
+
+### 步骤3：处理组织选择
+
+用户扫码后，页面会显示组织列表：
+
+1. 使用 `browser.snapshot` 获取页面内容：
+   ```
+   browser.snapshot(targetId="<targetId>")
+   ```
+
+2. 从 snapshot 中解析组织列表（页面包含"选择你管理的组织"标题，组织列表项为 table row 元素，ref 格式如 `e89`、`e99`）
+
+3. 将组织列表发给用户选择：
+   ```
+   message.send(message="✅ 扫码成功！检测到以下组织：\n1. 阿里巴巴集团\n2. 宜搭测试组织\n\n请回复数字序号选择组织")
+   ```
+
+4. 等待用户回复组织编号或名称。
+
+### 步骤4：点击选择组织
+
+根据用户选择，使用 `browser.act` 点击对应的组织元素：
+
+```
+browser.act(action="click", ref="<组织的ref>", targetId="<targetId>")
+```
+
+- ref 格式通常为 `e89`、`e99` 等（来自步骤3的 snapshot）
+- 点击后等待页面跳转完成（跳转到工作台首页）
+
+### 步骤5：保存登录信息
+
+点击组织后，执行以下脚本等待页面跳转、读取 Cookie 并保存：
+
+```bash
+python3 <SKILL_DIR>/scripts/login-interactive.py --stage save
+```
+
+脚本输出示例：
 ```json
-{"csrf_token":"b2a5d192-xxx","corp_id":"dingxxx","user_id":"1955225xxx","base_url":"https://abcd.aliwork.com"}
+{
+  "status": "success",
+  "csrf_token": "b2a5d192-db90-484c-880f-9b48edd396d5",
+  "corp_id": "ding9a0954b4f9d9d40ef5bf40eda33b7ba0",
+  "user_id": "19552253733782",
+  "base_url": "https://ding.aliwork.com",
+  "message": "🎉 登录成功！已保存登录态。\n  组织: ding9a...\n  用户: 19552...\n  域名: https://ding.aliwork.com"
+}
 ```
 
-### 示例 2：刷新 CSRF Token
-**场景**：CSRF Token 失效但 Cookie 有效
-**命令**：
+将 `message` 字段内容通过 `message.send` 告知用户：
+
+```
+message.send(message="🎉 登录成功！\n  组织: <corp_id>\n  用户: <user_id>\n  域名: <base_url>")
+```
+
+---
+
+## 关键实现细节
+
+### Cookie 提取规则
+
+| Cookie 名 | 提取内容 |
+|-----------|---------|
+| `tianshu_csrf_token` | `csrf_token` 值 |
+| `tianshu_corp_user` | 格式 `{corpId}_{userId}`，按最后一个 `_` 分隔 |
+
+### base_url 说明
+
+登录成功后，浏览器会跳转到实际的组织域名（如 `https://ding.aliwork.com`），从当前页面 URL 提取 `scheme://host` 作为 `base_url` 保存。
+
+### 缓存文件
+
+- **Cookie 缓存**: `<项目根目录>/.cache/cookies.json`
+- 格式：`{"cookies": [...], "base_url": "https://ding.aliwork.com"}`
+
+---
+
+## 注意事项
+
+- 宜搭必须通过钉钉账号登录
+- 用户需要先在钉钉 APP 上确认授权
+- 如果页面显示多个组织，需要让用户选择
+- 全程需要截图发送给用户确认进度
+- 截图后必须立即用 `message.send` 发图片，否则用户看不到
+
+---
+
+## 错误处理
+
+| 错误场景 | 处理方式 |
+|---------|---------|
+| 截图失败 | 重试步骤2，重新打开浏览器截图 |
+| 组织列表解析失败 | 截图发给用户，让用户告知组织名称后手动点击 |
+| Cookie 中无 `tianshu_csrf_token` | 等待后重试步骤5，或重新执行完整登录流程 |
+
+---
+
+## 与其他技能配合
+
+登录成功后，其他技能可通过以下方式获取登录态：
+
 ```bash
-python3 .claude/skills/yida-login/scripts/login.py --refresh-csrf
+python3 <SKILL_DIR>/scripts/check-login.py
 ```
 
-## 使用方式
+输出的 `csrf_token`、`corp_id`、`user_id`、`base_url` 可直接用于 API 调用。
 
-```bash
-python3 .claude/skills/yida-login/scripts/login.py
-```
-
-无需任何参数，登录地址从项目根目录的 `config.json` 中读取（`loginUrl` 字段），登录后可能跳转到 `abcd.aliwork.com` 等域名。
-
-**输出**：登录成功后，将 `csrf_token`、`base_url`（跳转后的实际域名）和 Cookie 信息以 JSON 格式输出到 stdout，同时 Cookie 持久化到项目根目录的 `.cache/cookies.json`。
-
-> ⚠️ **重要**：`base_url` 取自登录成功后浏览器**实际跳转到的域名**，而非 `config.json` 中配置的 `loginUrl` 或 `defaultBaseUrl`。例如，即使 `loginUrl` 配置为 `https://www.aliwork.com`，如果你的账号所属组织对应的是 `abcd.aliwork.com`，平台会自动跳转，最终 `base_url` 将是 `https://abcd.aliwork.com`。后续所有 API 请求（包括 `yida-publish` 发布）都会使用这个 `base_url`。如需发布到特定域名，请确保 `config.json` 中的 `loginUrl` 指向该域名对应的组织，并且你的账号属于该组织。
-
-> 项目根目录通过向上查找 `config.json` 或 `.git` 目录来定位。
-
-## 工作流程
-
-1. 检查本地是否存在 `.cache/cookies.json` 缓存（包含 Cookie 和 `base_url`）
-2. 若存在，**直接从 Cookie 中提取** `csrf_token`（`tianshu_csrf_token`）、`corp_id` 和 `user_id`（`tianshu_corp_user`），无需访问任何页面
-3. 若 Cookie 中无 `tianshu_csrf_token`，视为失效，打开有头浏览器让用户扫码登录
-4. 登录成功后直接从 Cookie 中提取所需信息，保存 Cookie 和 `base_url`（从登录后实际跳转的 URL 获取）
+---
 
 ## 前置依赖
 
-- Python 3.12+
-- playwright（`pip install playwright && playwright install chromium`）
+- OpenClaw 已安装并运行（`openclaw` 命令可用）
+- OpenClaw browser 功能已启用
+- Python 3.8+
 
 ## 文件结构
 
 ```
 yida-login/
-├── SKILL.md           # 本文档
+├── SKILL.md                    # 本文档（OpenClaw 技能定义）
 └── scripts/
-    └── login.py       # 登录脚本
-
-项目根目录/
-├── config.json        # 全局配置（loginUrl、defaultBaseUrl）
-└── .cache/
-    └── cookies.json   # 登录态缓存（运行时自动生成，含 Cookie + base_url）
+    ├── check-login.py          # 轻量级本地 Cookie 检查脚本（纯文件读取，不启动浏览器）
+    └── login-interactive.py    # 辅助脚本（获取组织列表、保存 Cookie 等）
 ```
-
-## 输出格式
-
-脚本成功执行后，最后一行输出 JSON：
-
-```json
-{
-  "csrf_token": "b2a5d192-db90-484c-880f-9b48edd396d5",
-  "corp_id": "ding9a0954b4f9d9d40ef5bf40eda33b7ba0",
-  "user_id": "19552253733782",
-  "base_url": "https://abcd.aliwork.com",
-  "cookies": [...]
-}
-```
-
-> `csrf_token` 从 Cookie `tianshu_csrf_token` 的 value 中提取；`corp_id` 和 `user_id` 从 Cookie `tianshu_corp_user` 的 value 中提取，格式为 `{corpId}_{userId}`，按最后一个 `_` 分隔。
-
-> `base_url` 是登录后浏览器实际跳转到的域名（如 `https://abcd.aliwork.com`），**可能与 `config.json` 中的 `loginUrl` 不同**。其他脚本应使用此值作为 API 请求的基础地址，而非硬编码域名。
-
-其他脚本可通过管道接收并解析 stdout 最后一行获取登录态信息。
-
-## 缓存格式
-
-`.cache/cookies.json` 文件格式（兼容旧版纯 Cookie 数组）：
-
-```json
-{
-  "cookies": [...],
-  "base_url": "https://abcd.aliwork.com"
-}
-```
-
-`csrf_token`、`corp_id`、`user_id` 不存储在缓存中，每次启动时直接从 Cookie 列表中提取（`tianshu_csrf_token` 和 `tianshu_corp_user` 字段）。
-
-## 全局配置
-
-所有脚本（`login.py` 及各 JS 脚本）从项目根目录的 `config.json` 读取配置，不再硬编码 URL：
-
-```json
-{
-  "loginUrl": "https://www.aliwork.com/workPlatform",
-  "defaultBaseUrl": "https://www.aliwork.com"
-}
-```
-
-| 字段 | 说明 |
-| --- | --- |
-| `loginUrl` | 扫码登录页面地址（登录成功后平台可能自动跳转到其他域名） |
-| `defaultBaseUrl` | API 请求的默认基础地址（仅当 `base_url` 未从登录态中获取时作为兜底使用，正常流程不会用到） |
-
-## 错误处理机制
-
-各 skill 脚本通过解析接口响应体的 `errorCode` 字段来判断登录态异常，并自动调用本技能处理：
-
-| errorCode | 含义 | 处理方式 |
-| --- | --- | --- |
-| `"TIANSHU_000030"` | csrf 校验失败（csrf_token 过期） | 调用 `login.py --refresh-csrf` 无头刷新 csrf_token，无需重新扫码 |
-| `"307"` | 登录状态已过期（Cookie 失效） | 调用 `login.py` 触发完整重新登录（可能需要扫码） |
-
-> **注意**：错误判断基于响应体 JSON 的 `errorCode` 字段，而非 HTTP 状态码。
-
-## 退出登录
-
-清空本地 Cookie 缓存文件内容即可完成退出，下次调用任意技能时将自动触发重新扫码登录：
-
-```bash
-echo -n "" > .cache/cookies.json
-```
-
-**适用场景**：
-- 需要切换账号或切换组织
-- Cookie 失效且无法自动刷新
-- 用户主动要求退出登录
-
-> **注意**：Cookie 缓存文件位于**项目根目录**（含 `README.md` 或 `.git` 的目录）的 `.cache/` 目录下。退出登录不影响已部署的页面和已保存的数据。
-
-## 与其他技能配合
-
-- **退出登录**：需要切换账号或 Cookie 失效时，执行上方「退出登录」命令后重新运行任意技能即可触发扫码登录
-- **`yida-publish`**：发布时自动调用本技能获取登录态
-- **`yida-create-app`**、**`yida-create-page`**、**`yida-create-form-page`**：通过管道将本技能输出传入

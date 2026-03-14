@@ -52,12 +52,14 @@ node .claude/skills/get-schema/scripts/get-schema.js "APP_XXX" "FORM-XXX"
 ## 前置依赖
 
 - Node.js
-- 项目根目录存在 `.cache/cookies.json`（首次运行会自动触发扫码登录）
+- 项目根目录存在 `.cache/cookies.json`（由 `yida-login` skill 生成）
+
+> ⚠️ **重要**：若 `.cache/cookies.json` 不存在或 Cookie 已失效，脚本会报错退出，**不会自动登录**。此时必须先调用 `yida-login` skill 完成登录，再重新执行本技能。
 
 ## 调用流程
 
-1. 读取项目根目录的 `.cache/cookies.json` 获取登录态；若不存在则自动调用 `login.py` 触发扫码登录
-2. 调用 `getFormSchema` 接口获取表单 Schema；根据响应体 `errorCode` 自动处理异常（详见 `yida-login` 技能文档「错误处理机制」章节）
+1. 读取项目根目录的 `.cache/cookies.json` 获取登录态；**若不存在或 Cookie 失效，脚本会报错退出，必须先调用 `yida-login` skill 完成登录**
+2. 调用 `getFormSchema` 接口获取表单 Schema
 3. 将 Schema 输出到 stdout
 
 ## 文件结构

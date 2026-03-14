@@ -19,6 +19,8 @@ package-lock.json
 
 # cookies
 .cache/cookies.json
+*/.cache/
+*/.cache/cookies.json
 
 # claude
 .claude/*

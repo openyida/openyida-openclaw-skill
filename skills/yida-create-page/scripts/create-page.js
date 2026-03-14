@@ -121,26 +121,9 @@ function loadCookieData() {
 }
 
 function triggerLogin() {
-  console.error("\n🔐 登录态失效，正在调用 login.py 重新登录...\n");
-  if (!fs.existsSync(LOGIN_SCRIPT)) {
-    console.error(`  ❌ 登录脚本不存在: ${LOGIN_SCRIPT}`);
-    process.exit(1);
-  }
-  const stdout = execSync(`python3 "${LOGIN_SCRIPT}"`, {
-    encoding: "utf-8",
-    stdio: ["inherit", "pipe", "inherit"],
-    timeout: 180_000,
-  });
-  const lines = stdout.trim().split("\n");
-  const jsonLine = lines[lines.length - 1];
-  try {
-    const loginResult = JSON.parse(jsonLine);
-    if (!loginResult.cookies) throw new Error("登录结果缺少 cookies");
-    return loginResult;
-  } catch (err) {
-    console.error(`  ❌ 解析登录结果失败: ${err.message}`);
-    process.exit(1);
-  }
+  console.error("\n❌ 登录态失效，请先调用 yida-login skill 完成登录后重试。\n");
+  console.error("   Cookie 缓存路径：" + COOKIE_FILE);
+  process.exit(1);
 }
 
 function resolveBaseUrl(cookieData) {
@@ -164,26 +147,9 @@ function isCsrfTokenExpired(responseJson) {
 }
 
 function refreshCsrfToken() {
-  console.error("\n🔄 csrf_token 已过期，正在刷新...\n");
-  if (!fs.existsSync(LOGIN_SCRIPT)) {
-    console.error(`  ❌ 登录脚本不存在: ${LOGIN_SCRIPT}`);
-    process.exit(1);
-  }
-  const stdout = execSync(`python3 "${LOGIN_SCRIPT}" --refresh-csrf`, {
-    encoding: "utf-8",
-    stdio: ["inherit", "pipe", "inherit"],
-    timeout: 60_000,
-  });
-  const lines = stdout.trim().split("\n");
-  const jsonLine = lines[lines.length - 1];
-  try {
-    const result = JSON.parse(jsonLine);
-    if (!result.csrf_token || !result.cookies) throw new Error("刷新结果缺少 csrf_token 或 cookies");
-    return result;
-  } catch (err) {
-    console.error(`  ❌ 解析刷新结果失败: ${err.message}`);
-    process.exit(1);
-  }
+  console.error("\n❌ csrf_token 已过期，请先调用 yida-login skill 重新登录后重试。\n");
+  console.error("   Cookie 缓存路径：" + COOKIE_FILE);
+  process.exit(1);
 }
 
 // ── 发送请求（支持 302 自动重登录） ──────────────────

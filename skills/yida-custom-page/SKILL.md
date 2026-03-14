@@ -95,7 +95,7 @@ node publish.js <appType> <formUuid> <源文件路径>
 | `formUuid` | 表单 ID | `FORM-XXX` |
 | `源文件路径` | 源码文件路径 | `pages/src/xxx.js` |
 
-> `baseUrl` 无需手动传入，脚本会自动调用 `login.py` 获取登录态并从中读取 `base_url`。
+> `baseUrl` 无需手动传入，脚本会自动从 `.cache/cookies.json` 中读取 `base_url`。**若 Cookie 不存在或已失效，脚本会报错退出，必须先调用 `yida-login` skill 完成交互式扫码登录（agent 截图发给用户扫码），再重新执行。**
 
 ---
 

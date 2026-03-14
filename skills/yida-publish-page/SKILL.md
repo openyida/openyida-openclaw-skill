@@ -46,7 +46,7 @@ node publish.js <appType> <formUuid> <源文件路径>
 | `formUuid` | 自定义页面 ID | `FORM-XXX` |
 | `源文件路径` | 源码文件路径（相对于项目根目录） | `pages/src/xxx.js` |
 
-> `baseUrl` 无需手动传入，脚本会自动从 `.cache/cookies.json` 读取登录态（若不存在或接口返回 302，则自动触发扫码登录），并从中读取 `base_url`。
+> `baseUrl` 无需手动传入，脚本会自动从 `.cache/cookies.json` 读取登录态，并从中读取 `base_url`。若 Cookie 不存在或已失效，脚本会报错退出，**必须先调用 `yida-login` skill 完成登录**，再重新执行本技能。
 
 **示例**：
 
@@ -58,9 +58,9 @@ node publish.js APP_XXX FORM-XXXXXX pages/src/xxx.js
 
 1. **编译源码**：通过 `@ali/vu-babel-transform` 将 JSX 转换为 ES5，再通过 UglifyJS 压缩
 2. **构建 Schema**：通过代码动态构建完整的 Schema JSON，将编译后的 `source` 和 `compiled` 填入 `actions.module`
-3. **读取登录态**：读取项目根目录的 `.cache/cookies.json`；若不存在则自动调用 `login.py` 触发扫码登录
-4. **发布 Schema**：通过 HTTP POST 调用 `saveFormSchema` 接口保存 Schema；根据响应体 `errorCode` 自动处理异常（详见 `yida-login` 技能文档「错误处理机制」章节）
-5. **更新表单配置**：调用 `updateFormConfig` 接口，设置 `MINI_RESOURCE` 配置为 `8`；同样根据响应体 `errorCode` 自动处理异常
+3. **读取登录态**：读取项目根目录的 `.cache/cookies.json`；**若不存在或 Cookie 失效，脚本会报错退出，必须先调用 `yida-login` skill 完成登录**
+4. **发布 Schema**：通过 HTTP POST 调用 `saveFormSchema` 接口保存 Schema
+5. **更新表单配置**：调用 `updateFormConfig` 接口，设置 `MINI_RESOURCE` 配置为 `8`
 
 > **注意**：发布目标地址由 `.cache/cookies.json` 中保存的 `base_url` 决定（即登录后浏览器实际跳转到的域名），而非 `config.json` 中的 `loginUrl`。详见 `yida-login` 技能文档。
 > **注意**：当发布页面碰到组织 corpId 不匹配 或  "您当前未在「xxx」组织内" 时，可以询问是否创建新的应用发布。
@@ -68,8 +68,9 @@ node publish.js APP_XXX FORM-XXXXXX pages/src/xxx.js
 ## 前置依赖
 
 - Node.js 16+
-- Python 3.12+（用于调用 yida-login）
-- playwright（Python 版，yida-login 依赖）
+- 项目根目录存在 `.cache/cookies.json`（由 `yida-login` skill 生成）
+
+> ⚠️ **重要**：若 `.cache/cookies.json` 不存在或 Cookie 已失效，脚本会报错退出，**不会自动登录**。此时必须先调用 `yida-login` skill 完成登录，再重新执行本技能。
 
 ```bash
 cd .claude/skills/yida-publish-page/scripts && npm install
@@ -145,6 +146,6 @@ yida-publish/
 
 ## 与其他技能配合
 
-- **`yida-login`**：登录态失效时自动调用（Cookie 持久化，首次或 302 时需扫码）
+- **`yida-login`**：登录态失效时必须手动调用此 skill（agent 用 browser 工具截图发给用户扫码，完成后保存 Cookie）
 - **`yida`**：编写源码后调用本技能发布
 - **`yida-app`**：完整应用开发流程的最后一步

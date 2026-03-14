@@ -71,13 +71,15 @@ node .claude/skills/yida-create-app/scripts/create-app.js "考勤管理" "员工
 ## 前置依赖
 
 - Node.js
-- 项目根目录存在 `.cache/cookies.json`（首次运行会自动触发扫码登录）
+- 项目根目录存在 `.cache/cookies.json`（由 `yida-login` skill 生成）
+
+> ⚠️ **重要**：若 `.cache/cookies.json` 不存在或 Cookie 已失效，脚本会报错退出，**不会自动登录**。此时必须先调用 `yida-login` skill 完成登录，再重新执行本技能。
 
 ## 调用流程
 
-1. 读取项目根目录的 `.cache/cookies.json` 获取登录态；若不存在则自动调用 `login.py` 触发扫码登录
+1. 读取项目根目录的 `.cache/cookies.json` 获取登录态；**若不存在或 Cookie 失效，脚本会报错退出，必须先调用 `yida-login` skill 完成登录**
 2. 构建 `registerApp` 请求参数
-3. 发送 POST 请求到 `/query/app/registerApp.json`；根据响应体 `errorCode` 自动处理异常（详见 `yida-login` 技能文档「错误处理机制」章节）
+3. 发送 POST 请求到 `/query/app/registerApp.json`
 4. 从返回值中获取应用 ID（appType）
 5. 将 `appType` 记录到 `prd/<项目名>.md` 备用
 
