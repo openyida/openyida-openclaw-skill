@@ -39,21 +39,25 @@ A set of AI Skills designed for the [DingTalk Yida (宜搭)](https://www.aliwork
 
 ### Quick Start
 
-#### Use with openyida project template (recommended)
+#### Option 1: Install via ClawHub (recommended)
+
+Visit [ClawHub — Yida Skills](https://clawhub.ai/nicky1108/yida-app) and click Install to use all Yida skills directly in OpenClaw — no manual cloning required.
+
+#### Option 2: Use with openyida project template
 
 ```bash
-# 1. Clone the repo (with Skills submodule)
+# Clone the repo (with Skills submodule)
 git clone --recurse-submodules https://github.com/openyida/openyida.git
 
-# 2. Open the project in your editor and start your AI coding tool (OpenClaw / Claude Code)
-# 3. Generate an app in one sentence: "Build me a birthday greeting mini-game app"
-# 4. Generate from a requirements doc: "Build a personal salary calculator app"
+# Open the project in your editor and start OpenClaw / Claude Code
+# Generate an app in one sentence: "Build me a birthday greeting mini-game app"
+# Generate from a requirements doc: "Build a personal salary calculator app"
 
 # Already cloned without submodules? Run:
 # git submodule update --init --recursive
 ```
 
-#### Use with your own project — follow this directory convention
+#### Option 3: Use with your own project — follow this directory convention
 
 ```
 project-root/
@@ -146,9 +150,9 @@ openyida-openclaw-skill/
 
 ### 技能列表
 
-| Skill | 名称 | 功能描述 |
-|-------|------|----------|
-| `yida-login` | 登录管理 | 对话式登录：先检查本地 Cookie 缓存，无效时通过 OpenClaw browser 工具打开钉钉扫码页面，引导用户扫码选择组织完成登录 |
+| 技能名称 | 中文名 | 功能描述 |
+|----------|--------|----------|
+| `yida-login` | 登录管理 | 对话式登录：先检查本地 Cookie 缓存，无效时通过 OpenClaw 浏览器工具打开钉钉扫码页面，引导用户扫码选择组织完成登录 |
 | `yida-logout` | 退出登录 | 清空本地 Cookie 缓存，使登录态失效 |
 | `yida-create-app` | 创建应用 | 调用 `registerApp` 接口快速创建宜搭应用 |
 | `yida-create-page` | 创建自定义页面 | 调用 `saveFormSchemaInfo` 接口创建自定义展示页面 |
@@ -156,25 +160,29 @@ openyida-openclaw-skill/
 | `yida-custom-page` | 自定义页面开发 | React 16 JSX 开发规范、27 个宜搭 JS API、编译与部署 |
 | `yida-publish-page` | 发布页面 | Babel 编译 + UglifyJS 压缩 + Schema 部署到宜搭平台 |
 | `yida-app` | 完整应用开发 | 编排型技能：从零到一搭建完整宜搭应用的全流程（无独立脚本） |
-| `yida-get-schema` | 获取表单 Schema | 调用 `getFormSchema` 接口获取表单完整 Schema 结构 |
+| `yida-get-schema` | 获取表单结构 | 调用 `getFormSchema` 接口获取表单完整结构数据 |
 
 ### 快速开始
 
-#### 使用 openyida 默认工程模板（推荐）
+#### 方式一：通过 ClawHub 一键安装（推荐）
+
+访问 [ClawHub 宜搭技能页](https://clawhub.ai/nicky1108/yida-app)，点击安装即可在 OpenClaw 中直接使用所有宜搭技能，无需手动克隆仓库。
+
+#### 方式二：使用 openyida 工程模板
 
 ```bash
-# 1. 克隆仓库（含 Skills 子模块）
+# 克隆仓库（含 Skills 子模块）
 git clone --recurse-submodules https://github.com/openyida/openyida.git
 
-# 2. 使用代码编辑器打开项目，打开 OpenClaw 或 Claude Code
-# 3. 一句话生成应用：帮我搭建一个生日祝福小游戏应用
-# 4. 根据需求文档生成应用：帮我搭建个人薪资计算器应用
+# 使用代码编辑器打开项目，打开 OpenClaw 或 Claude Code
+# 一句话生成应用：帮我搭建一个生日祝福小游戏应用
+# 根据需求文档生成应用：帮我搭建个人薪资计算器应用
 
 # 已克隆但未带子模块？执行以下命令补充初始化：
 # git submodule update --init --recursive
 ```
 
-#### 使用自己的项目工程，请参考文件结构约定
+#### 方式三：在自己的项目中使用，请参考文件结构约定
 
 ```
 项目根目录/
@@ -196,7 +204,7 @@ git clone --recurse-submodules https://github.com/openyida/openyida.git
 ```
 openyida-openclaw-skill/
 ├── skills/
-│   ├── shared/                    # 共享工具模块（fetch-with-retry、i18n）
+│   ├── shared/                    # 共享工具模块（网络请求重试、国际化）
 │   ├── yida-login/
 │   │   ├── SKILL.md
 │   │   └── scripts/
@@ -206,27 +214,27 @@ openyida-openclaw-skill/
 │   │   └── SKILL.md
 │   ├── yida-create-app/
 │   │   └── scripts/
-│   │       └── create-app.js
+│   │       └── create-app.js      # 创建应用脚本
 │   ├── yida-create-page/
 │   │   └── scripts/
-│   │       └── create-page.js
+│   │       └── create-page.js     # 创建自定义页面脚本
 │   ├── yida-create-form-page/
 │   │   └── scripts/
-│   │       └── create-form-page.js
+│   │       └── create-form-page.js  # 创建表单页面脚本
 │   ├── yida-custom-page/
 │   │   └── SKILL.md               # JSX 开发规范 + 27 个 JS API 参考
 │   ├── yida-publish-page/
 │   │   └── scripts/
-│   │       ├── publish.js
-│   │       └── babel-transform/
+│   │       ├── publish.js         # 发布脚本
+│   │       └── babel-transform/   # Babel 编译配置
 │   ├── yida-get-schema/
 │   │   └── scripts/
-│   │       └── get-schema.js
+│   │       └── get-schema.js      # 获取表单结构脚本
 │   └── yida-app/
-│       └── SKILL.md               # 编排型技能（无脚本）
+│       └── SKILL.md               # 编排型技能（无独立脚本）
 ├── config.json
 ├── .github/
-│   └── workflows/
+│   └── workflows/                 # CI 配置
 ├── README.md
 └── LICENSE
 ```
@@ -237,7 +245,7 @@ openyida-openclaw-skill/
 |------|----------|------|
 | Node.js | ≥ 16 | `yida-publish-page`、`yida-create-*` 系列脚本 |
 | Python | ≥ 3.8 | `yida-login` Cookie 检查脚本 |
-| OpenClaw | latest | browser 工具，用于交互式扫码登录 |
+| OpenClaw | 最新版 | 浏览器工具，用于交互式扫码登录 |
 
 ### DEMO 展示
 
@@ -247,9 +255,9 @@ openyida-openclaw-skill/
 
 ---
 
-#### 🌐 Landing Page - 智联协同
+#### 🌐 落地页 - 智联协同
 
-企业级产品介绍页，一句话生成完整 Landing Page。
+企业级产品介绍页，一句话生成完整落地页。
 
 ![智联协同](https://gw.alicdn.com/imgextra/i1/O1CN01EZtvfs1cxXV00UaXi_!!6000000003667-2-tps-5118-2470.png)
 
@@ -272,7 +280,7 @@ AI 生成灯谜图片，用户猜答案，猜错了有 AI 幽默提示。
 > 错误信息会显示具体行号和列号。
 
 **Q: Cookie 失效 / 登录失败怎么办？**
-> 调用 `yida-login` 技能，AI 会通过 browser 工具打开钉钉扫码页面，引导你重新登录。
+> 调用 `yida-login` 技能，AI 会通过浏览器工具打开钉钉扫码页面，引导你重新登录。
 
 ### 贡献指南
 
@@ -285,7 +293,7 @@ node --check skills/*/scripts/*.js
 
 ### 贡献者
 
-Thanks to all contributors:
+感谢所有参与贡献的开发者：
 
 <p align="left">
   <a href="https://github.com/yize"><img src="https://avatars.githubusercontent.com/u/1578814?v=4&s=48" width="48" height="48" alt="九神" title="九神"/></a> <a href="https://github.com/alex-mm"><img src="https://avatars.githubusercontent.com/u/3302053?v=4&s=48" width="48" height="48" alt="天晟" title="天晟"/></a> <a href="https://github.com/angelinheys"><img src="https://avatars.githubusercontent.com/u/49426983?v=4&s=48" width="48" height="48" alt="angelinheys" title="angelinheys"/></a> <a href="https://github.com/yipengmu"><img src="https://avatars.githubusercontent.com/u/3232735?v=4&s=48" width="48" height="48" alt="yipengmu" title="yipengmu"/></a> <a href="https://github.com/Waawww"><img src="https://avatars.githubusercontent.com/u/31886449?v=4&s=48" width="48" height="48" alt="Waawww" title="Waawww"/></a>
