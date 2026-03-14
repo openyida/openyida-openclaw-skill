@@ -2,18 +2,6 @@
 name: yida-logout
 description: 宜搭平台退出登录技能，清空本地 Cookie 缓存内容。
 license: MIT
-compatibility:
-  - opencode
-  - claude-code
-metadata:
-  audience: developers
-  workflow: yida-auth
-  version: 1.0.0
-  tags:
-    - yida
-    - auth
-    - logout
-    - cookie
 ---
 
 # 宜搭退出登录技能

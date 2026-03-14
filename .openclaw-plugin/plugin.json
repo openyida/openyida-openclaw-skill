@@ -1,0 +1,13 @@
+{
+  "name": "yida-skills",
+  "displayName": "宜搭技能库",
+  "description": "宜搭平台 AI 技能合集 - 登录、应用创建、表单开发、页面发布",
+  "version": "1.0.0",
+  "author": {
+    "name": "OpenYida",
+    "url": "https://github.com/openyida/yida-skills"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/openyida/yida-skills",
+  "skills": "./skills/"
+}

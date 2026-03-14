@@ -2,18 +2,6 @@
 name: yida-get-schema
 description: 宜搭表单 Schema 获取技能，通过调用 getFormSchema 接口获取指定表单的完整 Schema 结构，用于分析字段定义、组件配置、确认字段 ID（fieldId）等。
 license: MIT
-compatibility:
-  - opencode
-  - claude-code
-metadata:
-  audience: developers
-  workflow: yida-development
-  version: 1.0.0
-  tags:
-    - yida
-    - low-code
-    - schema
-    - api
 ---
 
 # 宜搭表单 Schema 获取技能

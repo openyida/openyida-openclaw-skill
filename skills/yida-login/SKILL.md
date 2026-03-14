@@ -2,18 +2,6 @@
 name: yida-login
 description: 宜搭平台登录态管理技能，通过 Playwright 管理登录态（Cookie 持久化 + 扫码登录），获取 CSRF Token。
 license: MIT
-compatibility:
-  - opencode
-  - claude-code
-metadata:
-  audience: developers
-  workflow: yida-auth
-  version: 1.0.0
-  tags:
-    - yida
-    - auth
-    - login
-    - cookie
 ---
 
 # 宜搭登录态管理技能

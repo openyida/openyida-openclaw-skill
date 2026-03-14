@@ -2,17 +2,6 @@
 name: yida-app
 description: 宜搭完整应用开发技能，描述从零到一搭建一个完整宜搭应用的全流程，包括创建应用、创建页面、需求分析、编写代码、创建表单、发布部署。
 license: MIT
-compatibility:
-  - opencode
-  - claude-code
-metadata:
-  audience: developers
-  workflow: yida-full-workflow
-  version: 1.0.0
-  tags:
-    - yida
-    - low-code
-    - workflow
 ---
 
 # 宜搭完整应用开发技能

@@ -2,17 +2,6 @@
 name: yida-create-app
 description: 宜搭应用创建技能，通过调用 registerApp 接口快速创建宜搭应用，支持自定义应用名称、描述和图标。
 license: MIT
-compatibility:
-  - opencode
-  - claude-code
-metadata:
-  audience: developers
-  workflow: yida-development
-  version: 1.0.0
-  tags:
-    - yida
-    - low-code
-    - app
 ---
 
 # 宜搭应用创建技能

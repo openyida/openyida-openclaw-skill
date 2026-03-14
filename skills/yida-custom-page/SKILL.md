@@ -2,18 +2,6 @@
 name: yida-custom-page
 description: 宜搭自定义页面开发技能，包含宜搭表单 JS API 调用（增删改查/流程/工具类共 27 个）、React 16 JSX 组件开发规范、状态管理模式与编码约束。
 license: MIT
-compatibility:
-  - opencode
-  - claude-code
-metadata:
-  audience: developers
-  workflow: yida-development
-  version: 1.0.0
-  tags:
-    - yida
-    - low-code
-    - react
-    - custom-page
 ---
 
 # 宜搭自定义页面开发技能

@@ -2,17 +2,6 @@
 name: yida-create-page
 description: 宜搭自定义页面创建技能，通过调用 saveFormSchemaInfo 接口快速创建自定义展示页面。
 license: MIT
-compatibility:
-  - opencode
-  - claude-code
-metadata:
-  audience: developers
-  workflow: yida-development
-  version: 1.0.0
-  tags:
-    - yida
-    - low-code
-    - page
 ---
 
 # 宜搭自定义页面创建技能

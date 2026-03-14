@@ -2,18 +2,6 @@
 name: yida-create-form-page
 description: 宜搭表单页面创建与更新技能，支持创建新表单（saveFormSchemaInfo + saveFormSchema + updateFormConfig）和更新已有表单（getFormSchema + saveFormSchema + updateFormConfig），支持 19 种字段类型（含 SerialNumberField 流水号）和字段增删改操作。
 license: MIT
-compatibility:
-  - opencode
-  - claude-code
-metadata:
-  audience: developers
-  workflow: yida-development
-  version: 1.0.0
-  tags:
-    - yida
-    - low-code
-    - form
-    - schema
 ---
 
 # 宜搭表单页面创建与更新技能

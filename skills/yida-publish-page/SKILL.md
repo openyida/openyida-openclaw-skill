@@ -2,18 +2,6 @@
 name: yida-publish-page
 description: 宜搭自定义页面发布技能，将 JSX 源码经 Babel 编译、UglifyJS 压缩后构建 Schema，并通过 saveFormSchema 接口部署到宜搭平台。
 license: MIT
-compatibility:
-  - opencode
-  - claude-code
-metadata:
-  audience: developers
-  workflow: yida-deployment
-  version: 1.0.0
-  tags:
-    - yida
-    - low-code
-    - deploy
-    - babel
 ---
 
 # 宜搭页面发布技能
