@@ -23,16 +23,20 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # ── 项目根目录定位 ────────────────────────────────────
 
+
 def find_project_root(start_dir):
     """从 start_dir 向上查找含 README.md 或 .git 的项目根目录。"""
     current = start_dir
     while True:
-        if os.path.exists(os.path.join(current, "README.md")) or os.path.isdir(os.path.join(current, ".git")):
+        if os.path.exists(os.path.join(current, "README.md")) or os.path.isdir(
+            os.path.join(current, ".git")
+        ):
             return current
         parent = os.path.dirname(current)
         if parent == current:
             return start_dir
         current = parent
+
 
 PROJECT_ROOT = find_project_root(SCRIPT_DIR)
 CONFIG_FILE = os.path.join(PROJECT_ROOT, "config.json")
@@ -43,16 +47,18 @@ LOGIN_STATE_FILE = os.path.join(PROJECT_ROOT, ".cache", "login-interactive-state
 
 # ── 配置加载 ──────────────────────────────────────────
 
+
 def load_config():
     """从项目根目录的 config.json 读取配置。"""
     if not os.path.exists(CONFIG_FILE):
         log("⚠️  config.json 不存在，使用默认值")
         return {
             "loginUrl": "https://www.aliwork.com/workPlatform",
-            "defaultBaseUrl": "https://www.aliwork.com"
+            "defaultBaseUrl": "https://www.aliwork.com",
         }
     with open(CONFIG_FILE, "r", encoding="utf-8") as file:
         return json.load(file)
+
 
 _config = load_config()
 LOGIN_URL = _config["loginUrl"]
@@ -60,11 +66,14 @@ DEFAULT_BASE_URL = _config["defaultBaseUrl"]
 
 # ── 日志工具 ──────────────────────────────────────────
 
+
 def log(message):
     """输出调试日志到 stderr，不影响 stdout 的 JSON 输出。"""
     print(f"[yida-login-v2] {message}", file=sys.stderr)
 
+
 # ── Cookie 持久化（复用自 login.py）─────────────────
+
 
 def save_login_cache(cookies, base_url=None):
     """将 Cookie 和 base_url 一起保存到本地缓存文件。"""
@@ -74,6 +83,7 @@ def save_login_cache(cookies, base_url=None):
     with open(COOKIE_FILE, "w", encoding="utf-8") as file:
         json.dump(cache, file, ensure_ascii=False, indent=2)
     log(f"Cookie 已保存到 {COOKIE_FILE}")
+
 
 def load_login_cache():
     """从本地文件加载缓存，返回 (cookies, base_url)。"""
@@ -98,6 +108,7 @@ def load_login_cache():
 
     return None, None
 
+
 def extract_info_from_cookies(cookies):
     """从 Cookie 列表中提取 csrf_token、corp_id、user_id。"""
     csrf_token = None
@@ -112,11 +123,13 @@ def extract_info_from_cookies(cookies):
             last_underscore = value.rfind("_")
             if last_underscore > 0:
                 corp_id = value[:last_underscore]
-                user_id = value[last_underscore + 1:]
+                user_id = value[last_underscore + 1 :]
 
     return csrf_token, corp_id, user_id
 
+
 # ── 阶段状态持久化 ────────────────────────────────────
+
 
 def save_login_state(state):
     """保存阶段间共享状态（如组织列表）到临时文件。"""
@@ -124,6 +137,7 @@ def save_login_state(state):
     os.makedirs(cache_dir, exist_ok=True)
     with open(LOGIN_STATE_FILE, "w", encoding="utf-8") as file:
         json.dump(state, file, ensure_ascii=False, indent=2)
+
 
 def load_login_state():
     """加载阶段间共享状态。"""
@@ -138,10 +152,12 @@ def load_login_state():
     except (json.JSONDecodeError, ValueError):
         return {}
 
+
 def clear_login_state():
     """清理临时状态文件。"""
     if os.path.exists(LOGIN_STATE_FILE):
         os.remove(LOGIN_STATE_FILE)
+
 
 # ── OpenClaw browser CLI 封装 ─────────────────────────
 #
@@ -162,6 +178,7 @@ def clear_login_state():
 #
 # 因此，我们针对不同命令使用不同的封装函数。
 
+
 def run_simple_command(subcommand_args):
     """
     执行不需要 JSON 输出的 browser 命令（navigate/start/click/wait 等）。
@@ -170,12 +187,7 @@ def run_simple_command(subcommand_args):
     command = ["openclaw", "browser"] + subcommand_args
     log(f"执行: {' '.join(command)}")
     try:
-        result = subprocess.run(
-            command,
-            capture_output=True,
-            text=True,
-            timeout=60
-        )
+        result = subprocess.run(command, capture_output=True, text=True, timeout=60)
         if result.returncode != 0:
             log(f"命令失败 (exit {result.returncode}): {result.stderr.strip()}")
             return False, result.stdout, result.stderr
@@ -187,6 +199,7 @@ def run_simple_command(subcommand_args):
         log("openclaw 命令未找到，请确认 OpenClaw 已安装并在 PATH 中")
         return False, "", "openclaw 命令未找到"
 
+
 def run_json_command(subcommand_args):
     """
     执行支持 JSON 输出的 browser 命令（cookies/evaluate 等）。
@@ -197,12 +210,7 @@ def run_json_command(subcommand_args):
     command = ["openclaw", "browser", "--json"] + subcommand_args
     log(f"执行: {' '.join(command)}")
     try:
-        result = subprocess.run(
-            command,
-            capture_output=True,
-            text=True,
-            timeout=60
-        )
+        result = subprocess.run(command, capture_output=True, text=True, timeout=60)
         if result.returncode != 0:
             log(f"命令失败 (exit {result.returncode}): {result.stderr.strip()}")
             return {"error": result.stderr or f"exit code {result.returncode}"}
@@ -217,6 +225,7 @@ def run_json_command(subcommand_args):
         return {"error": f"JSON 解析失败: {parse_error}", "raw": result.stdout[:500]}
     except FileNotFoundError:
         return {"error": "openclaw 命令未找到，请确认 OpenClaw 已安装并在 PATH 中"}
+
 
 def browser_screenshot():
     """
@@ -233,12 +242,13 @@ def browser_screenshot():
     for line in stdout.splitlines():
         line = line.strip()
         if line.startswith("MEDIA:"):
-            screenshot_path = line[len("MEDIA:"):].strip()
+            screenshot_path = line[len("MEDIA:") :].strip()
             log(f"截图路径: {screenshot_path}")
             return screenshot_path
 
     log(f"截图输出中未找到 MEDIA 路径，原始输出: {stdout[:300]}")
     return None
+
 
 def browser_snapshot_interactive():
     """
@@ -249,30 +259,31 @@ def browser_snapshot_interactive():
     success, stdout, stderr = run_simple_command(["snapshot", "--interactive"])
     return success, stdout
 
+
 def browser_click(ref):
     """点击指定 ref 的元素。ref 来自 snapshot 输出。"""
     success, stdout, stderr = run_simple_command(["click", ref])
     return success
+
 
 def browser_wait_selector(selector, timeout_ms=15000):
     """
     等待 CSS selector 对应的元素出现（可见）。
     selector 是位置参数：openclaw browser wait <selector> --timeout-ms <ms>
     """
-    success, stdout, stderr = run_simple_command([
-        "wait", selector,
-        "--timeout-ms", str(timeout_ms)
-    ])
+    success, stdout, stderr = run_simple_command(
+        ["wait", selector, "--timeout-ms", str(timeout_ms)]
+    )
     return success
+
 
 def browser_wait_url(url_pattern, timeout_ms=30000):
     """等待页面 URL 匹配指定 glob 模式。"""
-    success, stdout, stderr = run_simple_command([
-        "wait",
-        "--url", url_pattern,
-        "--timeout-ms", str(timeout_ms)
-    ])
+    success, stdout, stderr = run_simple_command(
+        ["wait", "--url", url_pattern, "--timeout-ms", str(timeout_ms)]
+    )
     return success
+
 
 def browser_cookies():
     """
@@ -289,6 +300,7 @@ def browser_cookies():
         return result
     return result.get("cookies") or result.get("items") or result.get("data") or []
 
+
 def browser_evaluate(js_fn):
     """
     在页面中执行 JS 函数。
@@ -297,6 +309,7 @@ def browser_evaluate(js_fn):
     """
     result = run_json_command(["evaluate", "--fn", js_fn])
     return result
+
 
 def get_current_page_url():
     """
@@ -313,6 +326,7 @@ def get_current_page_url():
         return url
     return ""
 
+
 # ── snapshot 文本解析工具 ─────────────────────────────
 #
 # OpenClaw snapshot --interactive 输出的是 AI snapshot 纯文本格式，
@@ -322,6 +336,7 @@ def get_current_page_url():
 #   listitem "阿里巴巴集团" [aria-ref="25"]
 #
 # 数字 ref（如 12）用于 click 命令：openclaw browser click 12
+
 
 def parse_snapshot_refs(snapshot_text):
     """
@@ -360,11 +375,12 @@ def parse_snapshot_refs(snapshot_text):
                 # 提取角色（行首第一个单词）
                 parts = text.split(None, 1)
                 role = parts[0].lower() if parts else "unknown"
-                name = parts[1].strip('"\'') if len(parts) > 1 else ""
+                name = parts[1].strip("\"'") if len(parts) > 1 else ""
                 if name:
                     elements.append({"role": role, "name": name, "ref": ref})
 
     return elements
+
 
 def find_ref_by_keywords(snapshot_text, keywords):
     """
@@ -376,9 +392,12 @@ def find_ref_by_keywords(snapshot_text, keywords):
         element_name = element.get("name", "").lower()
         for keyword in keywords:
             if keyword.lower() in element_name:
-                log(f"找到匹配元素: role={element['role']}, name={element['name']}, ref={element['ref']}")
+                log(
+                    f"找到匹配元素: role={element['role']}, name={element['name']}, ref={element['ref']}"
+                )
                 return element["ref"]
     return None
+
 
 # ── 阶段1：点击扫码 tab，等待二维码 canvas 出现 ───────
 #
@@ -387,6 +406,7 @@ def find_ref_by_keywords(snapshot_text, keywords):
 #   2. agent 调用本脚本 --stage 1，完成"点击扫码tab + 等待canvas"
 #   3. agent 调用 browser.screenshot(targetId=...) 截图
 #   4. agent 调用 message.send(media=<截图路径>) 发给用户
+
 
 def stage1_click_qrcode_tab_and_wait_canvas(session_id):
     """
@@ -410,8 +430,7 @@ def stage1_click_qrcode_tab_and_wait_canvas(session_id):
 
     if snapshot_success and snapshot_text:
         qrcode_tab_ref = find_ref_by_keywords(
-            snapshot_text,
-            ["扫码登录", "扫码", "二维码", "qrcode", "scan"]
+            snapshot_text, ["扫码登录", "扫码", "二维码", "qrcode", "scan"]
         )
         if qrcode_tab_ref:
             log(f"找到扫码登录 tab，ref={qrcode_tab_ref}，点击...")
@@ -428,14 +447,18 @@ def stage1_click_qrcode_tab_and_wait_canvas(session_id):
     # 3. 立即返回，告知 agent 可以截图了
     # 不等待 canvas，直接使用页面截图获取二维码，避免等待过长导致二维码过期
     save_login_state({"stage": 1})
-    output_result({
-        "stage": 1,
-        "status": "ready_for_screenshot",
-        "message": "二维码页面已就绪，请立即截图并发给用户扫码。",
-        "instruction": "请执行：browser.screenshot(targetId=...) 然后 message.send(media=<截图路径>, message='🔐 请用钉钉扫描二维码完成登录，扫码成功后告诉我')"
-    })
+    output_result(
+        {
+            "stage": 1,
+            "status": "ready_for_screenshot",
+            "message": "二维码页面已就绪，请立即截图并发给用户扫码。",
+            "instruction": "请执行：browser.screenshot(targetId=...) 然后 message.send(media=<截图路径>, message='🔐 请用钉钉扫描二维码完成登录，扫码成功后告诉我')",
+        }
+    )
+
 
 # ── 阶段2：获取组织列表 ───────────────────────────────
+
 
 def stage2_get_org_list(session_id):
     """
@@ -462,44 +485,50 @@ def stage2_get_org_list(session_id):
         # 未能自动提取，截图让用户手动确认
         log("未能自动提取组织列表，截图供参考...")
         screenshot_path = browser_screenshot()
-        save_login_state({
-            "stage": 2,
-            "organizations": [],
-            "screenshot_path": screenshot_path
-        })
-        output_result({
-            "stage": 2,
-            "status": "org_list_manual",
-            "screenshot_path": screenshot_path,
-            "message": (
-                "✅ 扫码成功！未能自动识别组织列表，请查看截图。\n"
-                "请告诉我您要选择的组织序号（从截图中数第几个组织）。"
-            ),
-            "organizations": []
-        })
+        save_login_state(
+            {"stage": 2, "organizations": [], "screenshot_path": screenshot_path}
+        )
+        output_result(
+            {
+                "stage": 2,
+                "status": "org_list_manual",
+                "screenshot_path": screenshot_path,
+                "message": (
+                    "✅ 扫码成功！未能自动识别组织列表，请查看截图。\n"
+                    "请告诉我您要选择的组织序号（从截图中数第几个组织）。"
+                ),
+                "organizations": [],
+            }
+        )
         return
 
     # 保存组织列表到状态文件，供阶段3使用
-    save_login_state({
-        "stage": 2,
-        "organizations": organizations
-    })
+    save_login_state({"stage": 2, "organizations": organizations})
+
+    # 优化：只有一个组织时自动选择
+    if len(organizations) == 1:
+        log(f"仅检测到 1 个组织，自动选择: {organizations[0]['name']}")
+        stage3_select_org_and_save_cookies(session_id, 1)
+        return
 
     org_list_text = "\n".join(
         f"  {index + 1}. {org['name']}" for index, org in enumerate(organizations)
     )
 
-    output_result({
-        "stage": 2,
-        "status": "waiting_for_org_selection",
-        "organizations": organizations,
-        "message": (
-            f"✅ 扫码成功！检测到以下组织，请回复序号选择：\n\n"
-            f"{org_list_text}\n\n"
-            f"请回复数字序号（如：1）"
-        ),
-        "instruction": "请回复您要登录的组织序号"
-    })
+    output_result(
+        {
+            "stage": 2,
+            "status": "waiting_for_org_selection",
+            "organizations": organizations,
+            "message": (
+                f"✅ 扫码成功！检测到以下组织，请回复序号选择：\n\n"
+                f"{org_list_text}\n\n"
+                f"请回复数字序号（如：1）"
+            ),
+            "instruction": "请回复您要登录的组织序号",
+        }
+    )
+
 
 def extract_org_list_from_snapshot(snapshot_text):
     """
@@ -515,9 +544,27 @@ def extract_org_list_from_snapshot(snapshot_text):
 
     # 需要过滤掉的非组织元素关键词
     skip_keywords = [
-        "登录", "退出", "返回", "取消", "确认", "ok", "cancel", "back",
-        "next", "下一步", "上一步", "prev", "close", "关闭", "刷新",
-        "refresh", "扫码", "账号", "密码", "手机", "验证码"
+        "登录",
+        "退出",
+        "返回",
+        "取消",
+        "确认",
+        "ok",
+        "cancel",
+        "back",
+        "next",
+        "下一步",
+        "上一步",
+        "prev",
+        "close",
+        "关闭",
+        "刷新",
+        "refresh",
+        "扫码",
+        "账号",
+        "密码",
+        "手机",
+        "验证码",
     ]
 
     # 组织卡片通常是 button、listitem、option、menuitem 角色
@@ -539,7 +586,9 @@ def extract_org_list_from_snapshot(snapshot_text):
 
     return organizations
 
+
 # ── 阶段3：点击组织，完成登录，保存 Cookie ────────────
+
 
 def stage3_select_org_and_save_cookies(session_id, org_index):
     """
@@ -612,7 +661,9 @@ def stage3_select_org_and_save_cookies(session_id, org_index):
                     output_error(f"无法找到序号 {org_index} 对应的组织元素")
                     return
             else:
-                output_error(f"页面中未找到足够的组织选项（找到 {len(fresh_orgs)} 个，需要第 {org_index} 个）")
+                output_error(
+                    f"页面中未找到足够的组织选项（找到 {len(fresh_orgs)} 个，需要第 {org_index} 个）"
+                )
                 return
         else:
             output_error("无法获取页面快照，请检查浏览器状态")
@@ -631,7 +682,9 @@ def stage3_select_org_and_save_cookies(session_id, org_index):
     cookies = browser_cookies()
 
     if not cookies:
-        output_error("无法读取 Cookie，登录可能未完成。请确认已选择组织并等待页面跳转。")
+        output_error(
+            "无法读取 Cookie，登录可能未完成。请确认已选择组织并等待页面跳转。"
+        )
         return
 
     # 提取登录信息
@@ -663,23 +716,27 @@ def stage3_select_org_and_save_cookies(session_id, org_index):
     log(f"✅ 登录成功！csrf_token: {csrf_token[:16]}...")
     log(f"✅ corp_id: {corp_id}, user_id: {user_id}, base_url: {base_url}")
 
-    output_result({
-        "stage": 3,
-        "status": "success",
-        "csrf_token": csrf_token,
-        "corp_id": corp_id,
-        "user_id": user_id,
-        "base_url": base_url,
-        "cookies": cookies,
-        "message": (
-            f"🎉 登录成功！已保存登录态。\n"
-            f"  组织: {corp_id}\n"
-            f"  用户: {user_id}\n"
-            f"  域名: {base_url}"
-        )
-    })
+    output_result(
+        {
+            "stage": 3,
+            "status": "success",
+            "csrf_token": csrf_token,
+            "corp_id": corp_id,
+            "user_id": user_id,
+            "base_url": base_url,
+            "cookies": cookies,
+            "message": (
+                f"🎉 登录成功！已保存登录态。\n"
+                f"  组织: {corp_id}\n"
+                f"  用户: {user_id}\n"
+                f"  域名: {base_url}"
+            ),
+        }
+    )
+
 
 # ── save 模式：agent 点击组织后，读取 Cookie 并保存 ──
+
 
 def save_cookies_after_agent_click(session_id):
     """
@@ -707,7 +764,9 @@ def save_cookies_after_agent_click(session_id):
     cookies = browser_cookies()
 
     if not cookies:
-        output_error("无法读取 Cookie，登录可能未完成。请确认已选择组织并等待页面跳转。")
+        output_error(
+            "无法读取 Cookie，登录可能未完成。请确认已选择组织并等待页面跳转。"
+        )
         return
 
     # 提取登录信息
@@ -739,65 +798,127 @@ def save_cookies_after_agent_click(session_id):
     log(f"✅ 登录成功！csrf_token: {csrf_token[:16]}...")
     log(f"✅ corp_id: {corp_id}, user_id: {user_id}, base_url: {base_url}")
 
-    output_result({
-        "status": "success",
+    output_result(
+        {
+            "status": "success",
+            "csrf_token": csrf_token,
+            "corp_id": corp_id,
+            "user_id": user_id,
+            "base_url": base_url,
+            "cookies": cookies,
+            "message": (
+                f"🎉 登录成功！已保存登录态。\n"
+                f"  组织: {corp_id}\n"
+                f"  用户: {user_id}\n"
+                f"  域名: {base_url}"
+            ),
+        }
+    )
+
+
+# ── 仅检查登录态（不触发登录）────────────────────────────
+
+
+def check_login_only():
+    """
+    仅检查登录态，不触发登录。
+
+    用于 AI Agent 判断是否需要登录。
+    Returns:
+        返回登录信息字典，包含 can_auto_use 字段供 AI 判断
+    """
+    saved_cookies, saved_base_url = load_login_cache()
+
+    if not saved_cookies:
+        return {
+            "status": "not_logged_in",
+            "can_auto_use": False,
+            "message": "本地无 Cookie 缓存，需要扫码登录",
+        }
+
+    csrf_token, corp_id, user_id = extract_info_from_cookies(saved_cookies)
+
+    if not csrf_token:
+        return {
+            "status": "not_logged_in",
+            "can_auto_use": False,
+            "message": "Cookie 中无 tianshu_csrf_token，需要重新登录",
+        }
+
+    base_url = saved_base_url or DEFAULT_BASE_URL
+    return {
+        "status": "ok",
+        "can_auto_use": True,
         "csrf_token": csrf_token,
         "corp_id": corp_id,
         "user_id": user_id,
         "base_url": base_url,
-        "cookies": cookies,
-        "message": (
-            f"🎉 登录成功！已保存登录态。\n"
-            f"  组织: {corp_id}\n"
-            f"  用户: {user_id}\n"
-            f"  域名: {base_url}"
-        )
-    })
+        "cookies": saved_cookies,
+        "message": f"✅ 已有有效登录态，可直接使用\n  组织: {corp_id}\n  用户: {user_id}\n  域名: {base_url}",
+    }
+
 
 # ── 输出工具 ──────────────────────────────────────────
+
 
 def output_result(data):
     """将结果以 JSON 格式输出到 stdout（供 OpenClaw agent 读取）。"""
     print(json.dumps(data, ensure_ascii=False, indent=2))
+
 
 def output_error(message):
     """输出错误结果并退出。"""
     output_result({"status": "error", "error": message})
     sys.exit(1)
 
+
 # ── CLI 入口 ──────────────────────────────────────────
+
 
 def main():
     parser = argparse.ArgumentParser(
         description="yida-login-v2: OpenClaw 对话式登录脚本"
     )
     parser.add_argument(
+        "--check-only",
+        action="store_true",
+        help="仅检查登录态，不触发登录。用于 AI Agent 判断是否需要登录。",
+    )
+    parser.add_argument(
         "--stage",
         type=str,
         choices=["1", "2", "3", "save"],
-        required=True,
         help=(
             "登录阶段：\n"
             "  1    = 点击扫码tab并等待二维码渲染\n"
-            "  2    = 获取组织列表（用户扫码后调用）\n"
+            "  2    = 获取组织列表（用户扫码后调用），支持自动选择\n"
             "  3    = 点击组织并保存Cookie（脚本负责点击）\n"
             "  save = 仅读取当前浏览器Cookie并保存（agent已点击组织后调用）"
-        )
+        ),
     )
     parser.add_argument(
         "--session-id",
         type=str,
         default="",
-        help="OpenClaw 会话 ID（当前版本仅用于日志记录，消息通过 stdout JSON 返回给 agent）"
+        help="OpenClaw 会话 ID（当前版本仅用于日志记录，消息通过 stdout JSON 返回给 agent）",
     )
     parser.add_argument(
         "--org-index",
         type=int,
         default=1,
-        help="阶段3使用：用户选择的组织序号（从1开始）"
+        help="阶段3使用：用户选择的组织序号（从1开始）",
     )
 
     args = parser.parse_args()
+
+    if args.check_only:
+        result = check_login_only()
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return
+
+    if not args.stage:
+        parser.print_help()
+        sys.exit(1)
 
     log(f"启动阶段 {args.stage}，session_id={args.session_id}")
 
@@ -809,6 +930,7 @@ def main():
         stage3_select_org_and_save_cookies(args.session_id, args.org_index)
     elif args.stage == "save":
         save_cookies_after_agent_click(args.session_id)
+
 
 if __name__ == "__main__":
     main()
