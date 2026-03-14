@@ -1,6 +1,6 @@
 ---
 name: yida-get-schema
-description: 宜搭表单 Schema 获取技能，通过调用 getFormSchema 接口获取指定表单的完整 Schema 结构，用于分析字段定义、组件配置、确认字段 ID（fieldId）等。
+description: 宜搭表单 Schema 获取技能，通过调用 getFormSchema 接口获取指定表单的完整 Schema 结构，用于分析字段定义、组件配置、确认字段 ID（fieldId）等。此技能用于：查看宜搭表单结构、获取宜搭字段ID、分析宜搭表单配置时使用此技能。
 license: MIT
 ---
 

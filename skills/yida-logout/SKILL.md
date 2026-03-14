@@ -1,6 +1,6 @@
 ---
 name: yida-logout
-description: 宜搭平台退出登录技能，清空本地 Cookie 缓存内容。
+description: 宜搭平台退出登录技能，清空本地 Cookie 缓存内容。此技能用于：退出宜搭登录、清除宜搭登录态、切换宜搭账号、宜搭账号登录不同时使用此技能。
 license: MIT
 ---
 

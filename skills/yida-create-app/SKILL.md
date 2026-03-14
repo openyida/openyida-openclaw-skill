@@ -1,6 +1,6 @@
 ---
 name: yida-create-app
-description: 宜搭应用创建技能，通过调用 registerApp 接口快速创建宜搭应用，支持自定义应用名称、描述和图标。
+description: 宜搭应用创建技能，通过调用 registerApp 接口快速创建宜搭应用，支持自定义应用名称、描述和图标。此技能用于：创建宜搭应用、新建一个宜搭app、做一个宜搭应用、开发宜搭应用时使用此技能。
 license: MIT
 ---
 
