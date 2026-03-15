@@ -1,6 +1,6 @@
 ---
 name: yida-publish-page
-description: 宜搭自定义页面发布技能，将 JSX 源码经 Babel 编译、UglifyJS 压缩后构建 Schema，并通过 saveFormSchema 接口部署到宜搭平台。
+description: 宜搭自定义页面发布技能，将 JSX 源码经 Babel 编译、UglifyJS 压缩后构建 Schema，并通过 saveFormSchema 接口部署到宜搭平台。此技能用于：发布宜搭自定义页面、上传宜搭代码、部署宜搭应用时使用此技能。
 license: MIT
 ---
 

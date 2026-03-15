@@ -1,6 +1,6 @@
 ---
 name: yida-create-page
-description: 宜搭自定义页面创建技能，通过调用 saveFormSchemaInfo 接口快速创建自定义展示页面。
+description: 宜搭自定义页面创建技能，通过调用 saveFormSchemaInfo 接口快速创建自定义展示页面。此技能用于：创建宜搭自定义页面、新建一个宜搭页面、开发宜搭页面时使用此技能。
 license: MIT
 ---
 
